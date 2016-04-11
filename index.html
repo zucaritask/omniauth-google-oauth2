@@ -1,0 +1,356 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Omniauth-google-oauth2 by zquestz</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <meta name="viewport" content="width=device-width">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Omniauth-google-oauth2</h1>
+        <p>Oauth2 strategy for Google</p>
+
+        <p class="view"><a href="https://github.com/zquestz/omniauth-google-oauth2">View the Project on GitHub <small>zquestz/omniauth-google-oauth2</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/zquestz/omniauth-google-oauth2/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/zquestz/omniauth-google-oauth2/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/zquestz/omniauth-google-oauth2">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <p><a href="https://badge.fury.io/rb/omniauth-google-oauth2"><img src="https://badge.fury.io/rb/omniauth-google-oauth2.svg" alt="Gem Version"></a>
+<a href="https://travis-ci.org/zquestz/omniauth-google-oauth2"><img src="https://travis-ci.org/zquestz/omniauth-google-oauth2.png" alt="Build Status"></a></p>
+
+<h1>
+<a id="omniauth-google-oauth2-strategy" class="anchor" href="#omniauth-google-oauth2-strategy" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>OmniAuth Google OAuth2 Strategy</h1>
+
+<p>Strategy to authenticate with Google via OAuth2 in OmniAuth.</p>
+
+<p>Get your API key at: <a href="https://code.google.com/apis/console/">https://code.google.com/apis/console/</a>  Note the Client ID and the Client Secret.</p>
+
+<p><strong>Note</strong>: You must enable the "Contacts API" and "Google+ API" via the Google API console. Otherwise, you will receive an <code>OAuth2::Error</code> stating that access is not configured when you attempt to authenticate.</p>
+
+<p>For more details, read the Google docs: <a href="https://developers.google.com/accounts/docs/OAuth2">https://developers.google.com/accounts/docs/OAuth2</a></p>
+
+<h2>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation</h2>
+
+<p>Add to your <code>Gemfile</code>:</p>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-k">gem</span> <span class="pl-s"><span class="pl-pds">"</span>omniauth-google-oauth2<span class="pl-pds">"</span></span></pre></div>
+
+<p>Then <code>bundle install</code>.</p>
+
+<h2>
+<a id="google-api-setup" class="anchor" href="#google-api-setup" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Google API Setup</h2>
+
+<ul>
+<li>Go to '<a href="https://console.developers.google.com">https://console.developers.google.com</a>'</li>
+<li>Select your project.</li>
+<li>Click 'Enable and manage APIs'.</li>
+<li>Make sure "Contacts API" and "Google+ API" are on.</li>
+<li>Go to Credentials, then select the "OAuth consent screen" tab on top, and provide an 'EMAIL ADDRESS' and a 'PRODUCT NAME'</li>
+<li>Wait 10 minutes for changes to take effect.</li>
+</ul>
+
+<h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage</h2>
+
+<p>Here's an example for adding the middleware to a Rails app in <code>config/initializers/omniauth.rb</code>:</p>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-c1">Rails</span>.application.config.middleware.use <span class="pl-c1">OmniAuth</span>::<span class="pl-c1">Builder</span> <span class="pl-k">do</span>
+  provider <span class="pl-c1">:google_oauth2</span>, <span class="pl-c1">ENV</span>[<span class="pl-s"><span class="pl-pds">"</span>GOOGLE_CLIENT_ID<span class="pl-pds">"</span></span>], <span class="pl-c1">ENV</span>[<span class="pl-s"><span class="pl-pds">"</span>GOOGLE_CLIENT_SECRET<span class="pl-pds">"</span></span>]
+<span class="pl-k">end</span></pre></div>
+
+<p>You can now access the OmniAuth Google OAuth2 URL: <code>/auth/google_oauth2</code></p>
+
+<p>For more examples please check out <code>examples/omni_auth.rb</code></p>
+
+<p>NOTE: While developing your application, if you change the scope in the initializer you will need to restart your app server. Remember that 'email' and 'profile' scopes are required!</p>
+
+<h2>
+<a id="configuration" class="anchor" href="#configuration" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Configuration</h2>
+
+<p>You can configure several options, which you pass in to the <code>provider</code> method via a hash:</p>
+
+<ul>
+<li>
+<code>scope</code>: A comma-separated list of permissions you want to request from the user. See the <a href="https://developers.google.com/oauthplayground/">Google OAuth 2.0 Playground</a> for a full list of available permissions. Caveats:
+
+<ul>
+<li>The <code>email</code> and <code>profile</code> scopes are used by default. By defining your own <code>scope</code>, you override these defaults. If you need these scopes, don't forget to add them yourself!</li>
+<li>Scopes starting with <code>https://www.googleapis.com/auth/</code> do not need that prefix specified. So while you can use the smaller scope <code>books</code> since that permission starts with the mentioned prefix, you should use the full scope URL <code>https://docs.google.com/feeds/</code> to access a user's docs, for example.</li>
+</ul>
+</li>
+<li>
+<p><code>prompt</code>: A space-delimited list of string values that determines whether the user is re-prompted for authentication and/or consent. Possible values are:</p>
+
+<ul>
+<li>
+<code>none</code>: No authentication or consent pages will be displayed; it will return an error if the user is not already authenticated and has not pre-configured consent for the requested scopes. This can be used as a method to check for existing authentication and/or consent.</li>
+<li>
+<code>consent</code>: The user will always be prompted for consent, even if he has previously allowed access a given set of scopes.</li>
+<li>
+<code>select_account</code>: The user will always be prompted to select a user account. This allows a user who has multiple current account sessions to select one amongst them.</li>
+</ul>
+
+<p>If no value is specified, the user only sees the authentication page if he is not logged in and only sees the consent page the first time he authorizes a given set of scopes.</p>
+</li>
+<li>
+<p><code>image_aspect_ratio</code>: The shape of the user's profile picture. Possible values are:</p>
+
+<ul>
+<li>
+<code>original</code>: Picture maintains its original aspect ratio.</li>
+<li>
+<code>square</code>: Picture presents equal width and height.</li>
+</ul>
+
+<p>Defaults to <code>original</code>.</p>
+</li>
+<li><p><code>image_size</code>: The size of the user's profile picture. The image returned will have width equal to the given value and variable height, according to the <code>image_aspect_ratio</code> chosen. Additionally, a picture with specific width and height can be requested by setting this option to a hash with <code>width</code> and <code>height</code> as keys. If only <code>width</code> or <code>height</code> is specified, a picture whose width or height is closest to the requested size and requested aspect ratio will be returned. Defaults to the original width and height of the picture.</p></li>
+<li><p><code>name</code>: The name of the strategy. The default name is <code>google_oauth2</code> but it can be changed to any value, for example <code>google</code>. The OmniAuth URL will thus change to <code>/auth/google</code> and the <code>provider</code> key in the auth hash will then return <code>google</code>.</p></li>
+<li><p><code>access_type</code>: Defaults to <code>offline</code>, so a refresh token is sent to be used when the user is not present at the browser. Can be set to <code>online</code>. More about <a href="https://developers.google.com/identity/protocols/OAuth2WebServer#offline">offline access</a></p></li>
+<li><p><code>hd</code>: (Optional) Limit sign-in to a particular Google Apps hosted domain. This can be simply string <code>'domain.com'</code> or an array <code>%w(domain.com domain.co)</code>. More information at: <a href="https://developers.google.com/accounts/docs/OpenIDConnect#hd-param">https://developers.google.com/accounts/docs/OpenIDConnect#hd-param</a></p></li>
+<li><p><code>jwt_leeway</code>: Number of seconds passed to the JWT library as leeway. Defaults to 60 seconds.</p></li>
+<li><p><code>skip_jwt</code>: Skip JWT processing. This is for users who are seeing JWT decoding errors with the <code>iat</code> field. Always try adjusting the leeway before disabling JWT processing.</p></li>
+<li><p><code>login_hint</code>: When your app knows which user it is trying to authenticate, it can provide this parameter as a hint to the authentication server. Passing this hint suppresses the account chooser and either pre-fill the email box on the sign-in form, or select the proper session (if the user is using multiple sign-in), which can help you avoid problems that occur if your app logs in the wrong user account. The value can be either an email address or the sub string, which is equivalent to the user's Google+ ID.</p></li>
+<li><p><code>include_granted_scopes</code>: If this is provided with the value true, and the authorization request is granted, the authorization will include any previous authorizations granted to this user/application combination for other scopes. See Google's <a href="https://developers.google.com/accounts/docs/OAuth2WebServer#incrementalAuth">Incremental Authorization</a> for additional details.</p></li>
+<li><p><code>openid_realm</code>: Set the OpenID realm value, to allow upgrading from OpenID based authentication to OAuth 2 based authentication. When this is set correctly an <code>openid_id</code> value will be set in <code>[:extra][:id_info]</code> in the authentication hash with the value of the user's OpenID ID URL.</p></li>
+</ul>
+
+<p>Here's an example of a possible configuration where the strategy name is changed, the user is asked for extra permissions, the user is always prompted to select his account when logging in and the user's profile picture is returned as a thumbnail:</p>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-c1">Rails</span>.application.config.middleware.use <span class="pl-c1">OmniAuth</span>::<span class="pl-c1">Builder</span> <span class="pl-k">do</span>
+  provider <span class="pl-c1">:google_oauth2</span>, <span class="pl-c1">ENV</span>[<span class="pl-s"><span class="pl-pds">"</span>GOOGLE_CLIENT_ID<span class="pl-pds">"</span></span>], <span class="pl-c1">ENV</span>[<span class="pl-s"><span class="pl-pds">"</span>GOOGLE_CLIENT_SECRET<span class="pl-pds">"</span></span>],
+    {
+      <span class="pl-c1">:name</span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>google<span class="pl-pds">"</span></span>,
+      <span class="pl-c1">:scope</span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>email, profile, plus.me, http://gdata.youtube.com<span class="pl-pds">"</span></span>,
+      <span class="pl-c1">:prompt</span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>select_account<span class="pl-pds">"</span></span>,
+      <span class="pl-c1">:image_aspect_ratio</span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>square<span class="pl-pds">"</span></span>,
+      <span class="pl-c1">:image_size</span> =&gt; <span class="pl-c1">50</span>
+    }
+<span class="pl-k">end</span></pre></div>
+
+<h2>
+<a id="auth-hash" class="anchor" href="#auth-hash" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Auth Hash</h2>
+
+<p>Here's an example of an authentication hash available in the callback by accessing <code>request.env["omniauth.auth"]</code>:</p>
+
+<div class="highlight highlight-source-ruby"><pre>{
+    <span class="pl-c1">:provider</span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>google_oauth2<span class="pl-pds">"</span></span>,
+    <span class="pl-c1">:uid</span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>123456789<span class="pl-pds">"</span></span>,
+    <span class="pl-c1">:info</span> =&gt; {
+        <span class="pl-c1">:name</span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>John Doe<span class="pl-pds">"</span></span>,
+        <span class="pl-c1">:email</span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>john@company_name.com<span class="pl-pds">"</span></span>,
+        <span class="pl-c1">:first_name</span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>John<span class="pl-pds">"</span></span>,
+        <span class="pl-c1">:last_name</span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>Doe<span class="pl-pds">"</span></span>,
+        <span class="pl-c1">:image</span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>https://lh3.googleusercontent.com/url/photo.jpg<span class="pl-pds">"</span></span>
+    },
+    <span class="pl-c1">:credentials</span> =&gt; {
+        <span class="pl-c1">:token</span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>token<span class="pl-pds">"</span></span>,
+        <span class="pl-c1">:refresh_token</span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>another_token<span class="pl-pds">"</span></span>,
+        <span class="pl-c1">:expires_at</span> =&gt; <span class="pl-c1">1354920555</span>,
+        <span class="pl-c1">:expires</span> =&gt; <span class="pl-c1">true</span>
+    },
+    <span class="pl-c1">:extra</span> =&gt; {
+        <span class="pl-c1">:raw_info</span> =&gt; {
+            <span class="pl-c1">:sub</span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>123456789<span class="pl-pds">"</span></span>,
+            <span class="pl-c1">:email</span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>user@domain.example.com<span class="pl-pds">"</span></span>,
+            <span class="pl-c1">:email_verified</span> =&gt; <span class="pl-c1">true</span>,
+            <span class="pl-c1">:name</span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>John Doe<span class="pl-pds">"</span></span>,
+            <span class="pl-c1">:given_name</span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>John<span class="pl-pds">"</span></span>,
+            <span class="pl-c1">:family_name</span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>Doe<span class="pl-pds">"</span></span>,
+            <span class="pl-c1">:profile</span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>https://plus.google.com/123456789<span class="pl-pds">"</span></span>,
+            <span class="pl-c1">:picture</span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>https://lh3.googleusercontent.com/url/photo.jpg<span class="pl-pds">"</span></span>,
+            <span class="pl-c1">:gender</span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>male<span class="pl-pds">"</span></span>,
+            <span class="pl-c1">:birthday</span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>0000-06-25<span class="pl-pds">"</span></span>,
+            <span class="pl-c1">:locale</span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>en<span class="pl-pds">"</span></span>,
+            <span class="pl-c1">:hd</span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>company_name.com<span class="pl-pds">"</span></span>
+        },
+        <span class="pl-c1">:id_info</span> =&gt; {
+            <span class="pl-s"><span class="pl-pds">"</span>iss<span class="pl-pds">"</span></span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>accounts.google.com<span class="pl-pds">"</span></span>,
+            <span class="pl-s"><span class="pl-pds">"</span>at_hash<span class="pl-pds">"</span></span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>HK6E_P6Dh8Y93mRNtsDB1Q<span class="pl-pds">"</span></span>,
+            <span class="pl-s"><span class="pl-pds">"</span>email_verified<span class="pl-pds">"</span></span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>true<span class="pl-pds">"</span></span>,
+            <span class="pl-s"><span class="pl-pds">"</span>sub<span class="pl-pds">"</span></span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>10769150350006150715113082367<span class="pl-pds">"</span></span>,
+            <span class="pl-s"><span class="pl-pds">"</span>azp<span class="pl-pds">"</span></span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>APP_ID<span class="pl-pds">"</span></span>,
+            <span class="pl-s"><span class="pl-pds">"</span>email<span class="pl-pds">"</span></span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>jsmith@example.com<span class="pl-pds">"</span></span>,
+            <span class="pl-s"><span class="pl-pds">"</span>aud<span class="pl-pds">"</span></span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>APP_ID<span class="pl-pds">"</span></span>,
+            <span class="pl-s"><span class="pl-pds">"</span>iat<span class="pl-pds">"</span></span> =&gt; <span class="pl-c1">1353601026</span>,
+            <span class="pl-s"><span class="pl-pds">"</span>exp<span class="pl-pds">"</span></span> =&gt; <span class="pl-c1">1353604926</span>,
+            <span class="pl-s"><span class="pl-pds">"</span>openid_id<span class="pl-pds">"</span></span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>https://www.google.com/accounts/o8/id?id=ABCdfdswawerSDFDsfdsfdfjdsf<span class="pl-pds">"</span></span>
+        }
+    }
+}</pre></div>
+
+<h3>
+<a id="devise" class="anchor" href="#devise" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Devise</h3>
+
+<p>First define your application id and secret in <code>config/initializers/devise.rb</code>. Do not use the snippet mentioned in the <a href="https://github.com/zquestz/omniauth-google-oauth2#usage">Usage</a> section.</p>
+
+<div class="highlight highlight-source-ruby"><pre>config.omniauth <span class="pl-c1">:google_oauth2</span>, <span class="pl-s"><span class="pl-pds">"</span>GOOGLE_CLIENT_ID<span class="pl-pds">"</span></span>, <span class="pl-s"><span class="pl-pds">"</span>GOOGLE_CLIENT_SECRET<span class="pl-pds">"</span></span>, { }</pre></div>
+
+<p>Then add the following to 'config/routes.rb' so the callback routes are defined.</p>
+
+<div class="highlight highlight-source-ruby"><pre>devise_for <span class="pl-c1">:users</span>, <span class="pl-c1">:controllers</span> =&gt; { <span class="pl-c1">:omniauth_callbacks</span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>users/omniauth_callbacks<span class="pl-pds">"</span></span> }</pre></div>
+
+<p>Make sure your model is omniauthable. Generally this is "/app/models/user.rb"</p>
+
+<div class="highlight highlight-source-ruby"><pre>devise <span class="pl-c1">:omniauthable</span>, <span class="pl-c1">:omniauth_providers</span> =&gt; [<span class="pl-c1">:google_oauth2</span>]</pre></div>
+
+<p>Then make sure your callbacks controller is setup.</p>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-k">class</span> <span class="pl-en">Users::OmniauthCallbacksController<span class="pl-e"> &lt; Devise::OmniauthCallbacksController</span></span>
+  <span class="pl-k">def</span> <span class="pl-en">google_oauth2</span>
+      <span class="pl-c"># You need to implement the method below in your model (e.g. app/models/user.rb)</span>
+      <span class="pl-smi">@user</span> <span class="pl-k">=</span> <span class="pl-c1">User</span>.from_omniauth(request.env[<span class="pl-s"><span class="pl-pds">"</span>omniauth.auth<span class="pl-pds">"</span></span>])
+
+      <span class="pl-k">if</span> <span class="pl-smi">@user</span>.persisted?
+        flash[<span class="pl-c1">:notice</span>] <span class="pl-k">=</span> <span class="pl-c1">I18n</span>.t <span class="pl-s"><span class="pl-pds">"</span>devise.omniauth_callbacks.success<span class="pl-pds">"</span></span>, <span class="pl-c1">:kind</span> =&gt; <span class="pl-s"><span class="pl-pds">"</span>Google<span class="pl-pds">"</span></span>
+        sign_in_and_redirect <span class="pl-smi">@user</span>, <span class="pl-c1">:event</span> =&gt; <span class="pl-c1">:authentication</span>
+      <span class="pl-k">else</span>
+        session[<span class="pl-s"><span class="pl-pds">"</span>devise.google_data<span class="pl-pds">"</span></span>] <span class="pl-k">=</span> request.env[<span class="pl-s"><span class="pl-pds">"</span>omniauth.auth<span class="pl-pds">"</span></span>]
+        redirect_to new_user_registration_url
+      <span class="pl-k">end</span>
+  <span class="pl-k">end</span>
+<span class="pl-k">end</span></pre></div>
+
+<p>and bind to or create the user</p>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-k">def</span> <span class="pl-en">self.from_omniauth</span>(<span class="pl-smi">access_token</span>)
+    data <span class="pl-k">=</span> access_token.info
+    user <span class="pl-k">=</span> <span class="pl-c1">User</span>.where(<span class="pl-c1">:email</span> =&gt; data[<span class="pl-s"><span class="pl-pds">"</span>email<span class="pl-pds">"</span></span>]).first
+
+    <span class="pl-c"># Uncomment the section below if you want users to be created if they don't exist</span>
+    <span class="pl-c"># unless user</span>
+    <span class="pl-c">#     user = User.create(name: data["name"],</span>
+    <span class="pl-c">#        email: data["email"],</span>
+    <span class="pl-c">#        password: Devise.friendly_token[0,20]</span>
+    <span class="pl-c">#     )</span>
+    <span class="pl-c"># end</span>
+    user
+<span class="pl-k">end</span></pre></div>
+
+<p>For your views you can login using:</p>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-k">&lt;</span><span class="pl-k">%=</span> link_to <span class="pl-s"><span class="pl-pds">"</span>Sign in with Google<span class="pl-pds">"</span></span>, user_omniauth_authorize_path(<span class="pl-c1">:google_oauth2</span>) <span class="pl-s"><span class="pl-pds">%&gt;</span></span></pre></div>
+
+<p>An overview is available at <a href="https://github.com/plataformatec/devise/wiki/OmniAuth:-Overview">https://github.com/plataformatec/devise/wiki/OmniAuth:-Overview</a></p>
+
+<h3>
+<a id="one-time-code-flow-hybrid-authentication" class="anchor" href="#one-time-code-flow-hybrid-authentication" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>One-time Code Flow (Hybrid Authentication)</h3>
+
+<p>Google describes the One-time Code Flow <a href="https://developers.google.com/+/web/signin/server-side-flow">here</a>.  This hybrid authentication flow has significant functional and security advantages over a pure server-side or pure client-side flow.  The following steps occur in this flow:</p>
+
+<ol>
+<li>The client (web browser) authenticates the user directly via Google's JS API.  During this process assorted modals may be rendered by Google.</li>
+<li>On successful authentication, Google returns a one-time use code, which requires the Google client secret (which is only available server-side).</li>
+<li>Using a AJAX request, the code is POSTed to the Omniauth Google OAuth2 callback.</li>
+<li>The Omniauth Google OAuth2 gem will validate the code via a server-side request to Google.  If the code is valid, then Google will return an access token and, if this is the first time this user is authenticating against this application, a refresh token.  Both of these should be stored on the server.  The response to the AJAX request indicates the success or failure of this process.</li>
+</ol>
+
+<p>This flow is immune to replay attacks, and conveys no useful information to a man in the middle.</p>
+
+<p>The omniauth-google-oauth2 gem supports this mode of operation out of the box.  Implementors simply need to add the appropriate JavaScript to their web page, and they can take advantage of this flow.  An example JavaScript snippet follows.</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-c">// Basic hybrid auth example following the pattern at:</span>
+<span class="pl-c">// https://developers.google.com/api-client-library/javascript/features/authentication#Authexample</span>
+<span class="pl-en">jQuery</span>(<span class="pl-k">function</span>() {
+  <span class="pl-k">return</span> <span class="pl-smi">$</span>.<span class="pl-en">ajax</span>({
+    url<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>https://apis.google.com/js/client:plus.js?onload=gpAsyncInit<span class="pl-pds">'</span></span>,
+    dataType<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>script<span class="pl-pds">'</span></span>,
+    cache<span class="pl-k">:</span> <span class="pl-c1">true</span>
+  });
+});
+
+<span class="pl-c1">window</span>.<span class="pl-en">gpAsyncInit</span> <span class="pl-k">=</span> <span class="pl-k">function</span>() {
+  <span class="pl-smi">gapi</span>.<span class="pl-smi">auth</span>.<span class="pl-en">authorize</span>({
+    immediate<span class="pl-k">:</span> <span class="pl-c1">true</span>,
+    response_type<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>code<span class="pl-pds">'</span></span>,
+    cookie_policy<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>single_host_origin<span class="pl-pds">'</span></span>,
+    client_id<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>YOUR_CLIENT_ID<span class="pl-pds">'</span></span>,
+    scope<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>email profile<span class="pl-pds">'</span></span>
+  }, <span class="pl-k">function</span>(<span class="pl-smi">response</span>) {
+    <span class="pl-k">return</span>;
+  });
+  <span class="pl-en">$</span>(<span class="pl-s"><span class="pl-pds">'</span>.googleplus-login<span class="pl-pds">'</span></span>).<span class="pl-c1">click</span>(<span class="pl-k">function</span>(<span class="pl-smi">e</span>) {
+    <span class="pl-smi">e</span>.<span class="pl-en">preventDefault</span>();
+    <span class="pl-smi">gapi</span>.<span class="pl-smi">auth</span>.<span class="pl-en">authorize</span>({
+      immediate<span class="pl-k">:</span> <span class="pl-c1">false</span>,
+      response_type<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>code<span class="pl-pds">'</span></span>,
+      cookie_policy<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>single_host_origin<span class="pl-pds">'</span></span>,
+      client_id<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>YOUR_CLIENT_ID<span class="pl-pds">'</span></span>,
+      scope<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>email profile<span class="pl-pds">'</span></span>
+    }, <span class="pl-k">function</span>(<span class="pl-smi">response</span>) {
+      <span class="pl-k">if</span> (response <span class="pl-k">&amp;&amp;</span> <span class="pl-k">!</span><span class="pl-smi">response</span>.<span class="pl-smi">error</span>) {
+        <span class="pl-c">// google authentication succeed, now post data to server.</span>
+        <span class="pl-smi">jQuery</span>.<span class="pl-en">ajax</span>({type<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">'</span>POST<span class="pl-pds">'</span></span>, url<span class="pl-k">:</span> <span class="pl-s"><span class="pl-pds">"</span>/auth/google_oauth2/callback<span class="pl-pds">"</span></span>, 
+data<span class="pl-k">:</span> response,
+          <span class="pl-en">success</span><span class="pl-k">:</span> <span class="pl-k">function</span>(<span class="pl-smi">data</span>) {
+            <span class="pl-c">// response from server</span>
+          }
+        });
+      } <span class="pl-k">else</span> {
+        <span class="pl-c">// google authentication failed</span>
+      }
+    });
+  });
+};
+</pre></div>
+
+<h3>
+<a id="omniauth-state" class="anchor" href="#omniauth-state" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Omniauth state</h3>
+
+<p>If you'd like to use omniauth state param, you can implement it by yourself using rails csrf token. For example:</p>
+
+<div class="highlight highlight-source-ruby"><pre><span class="pl-k">class</span> <span class="pl-en">ApplicationController<span class="pl-e"> &lt; ActionController::Base</span></span>
+  before_action <span class="pl-c1">:initialize_omniauth_state</span>
+
+  <span class="pl-k">protected</span>
+
+  <span class="pl-k">def</span> <span class="pl-en">initialize_omniauth_state</span>
+    session[<span class="pl-s"><span class="pl-pds">'</span>omniauth.state<span class="pl-pds">'</span></span>] <span class="pl-k">=</span> response.headers[<span class="pl-s"><span class="pl-pds">'</span>X-CSRF-Token<span class="pl-pds">'</span></span>] <span class="pl-k">=</span> form_authenticity_token
+  <span class="pl-k">end</span>
+...</pre></div>
+
+<p>and add <code>skip_before_filter :verify_authenticity_token</code> in your omniauth callback controller because it is already verified by omniauth state. And then you need to add <code>:provider_ignores_state =&gt; true</code> in your omniauth initializer.</p>
+
+<h2>
+<a id="fixing-protocol-mismatch-for-redirect_uri-in-rails" class="anchor" href="#fixing-protocol-mismatch-for-redirect_uri-in-rails" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Fixing Protocol Mismatch for <code>redirect_uri</code> in Rails</h2>
+
+<p>Just set the <code>full_host</code> in OmniAuth based on the Rails.env.</p>
+
+<pre><code># config/initialisers/omniauth.rb
+OmniAuth.config.full_host = Rails.env.production? ? 'https://domain.com' : 'http://localhost:3000'
+</code></pre>
+
+<h2>
+<a id="license" class="anchor" href="#license" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>License</h2>
+
+<p>Copyright (c) 2016 by Josh Ellithorpe</p>
+
+<p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</p>
+
+<p>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</p>
+
+<p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/zquestz">zquestz</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
